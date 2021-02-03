@@ -1,4 +1,4 @@
-# Pythonプロジェクトのテンプレート　レベル2
+# Pythonプロジェクトのテンプレート　レベル3
 
 - @author kazurayam
 - @date Feb 2021
@@ -46,11 +46,11 @@ Python言語でプログラムを自作したい。そのために環境を作�
 Gitレポジトリを4つ作る。
 
 1. [PythonProjectTemplateLevel1](https://github.com/kazurayam/PythonProjectTemplateLevel1) --- Python処理系をインストールする。pipenvで仮想環境を構築する。わたし流のディレクトリ構造を決める。IntelliJ IDEAを設定する。pytestでユニットテストする。
-1. [PythonProjectTemplateLevel2](https://github.com/kazurayam/PythonProjectTemplateLevel2) --- つまりこのレポジトリ。わたしのPythonコードをpipでライブラリにしてPyPIにアップロードして共有可能にする。そのライブラリを仕込んだDockerイメージを作りDocker Hubにアップロードして共有可能にする。
-1. [PythonProjectTemplateLevel3](https://github.com/kazurayam/PythonProjectTemplateLevel3) --- 単純なWebサーバアプリケーションを作る。Laravelフレームワークで。Dockerイメージを作る。
-1. [PythonProjectTemplateLevel4](https://github.com/kazurayam/PythonProjectTemplateLevel4) --- Laravelで作ったWebサーバアプリのユーザインタフェースをSeleniumでテストする。Page Objectモデルで。
+1. [PythonProjectTemplateLevel2](https://github.com/kazurayam/PythonProjectTemplateLevel2) --- わたしのPythonコードをpipでライブラリにしてPyPIにアップロードして共有可能にする。そのライブラリを仕込んだDockerイメージを作りDocker Hubにアップロードして共有可能にする。
+1. [PythonProjectTemplateLevel3](https://github.com/kazurayam/PythonProjectTemplateLevel3) --- つまりこのレポジトリ。Flaskフレームワークを使ってWebサーバアプリケーションを作る。Dockerイメージを作る。
+1. [PythonProjectTemplateLevel4](https://github.com/kazurayam/PythonProjectTemplateLevel4) --- Level3で作ったWebサーバアプリのユーザインタフェースをSeleniumでテストする。Page Objectモデルで。
 
-このプロジェクトを最初に作るにあたっては [GitHubのレポジトリテンプレート機能](https://dev.classmethod.jp/articles/github-template-repository/) を利用した。すなわちGitHubのサイトで Level1のレポジトリを Template RepositoryとするようチェックボックスをONした。そしてLevel2のレポジトリをNewするにあたって、Level1のレポジトリをTemplate Repositoryとして指定した。するとLevel1のファイルとディレクトリがコピーされて下書きとして使えるようになっていた。便利ですね。
+このプロジェクトを最初に作るにあたっては [GitHubのレポジトリテンプレート機能](https://dev.classmethod.jp/articles/github-template-repository/) を利用した。すなわちGitHubのサイトで Level2のレポジトリを Template RepositoryとするようチェックボックスをONした。そしてLevel3のレポジトリをNewするにあたって、Level2のレポジトリをTemplate Repositoryとして指定した。するとLevel2のファイルとディレクトリがコピーされて下書きとして使えるようになっていた。便利ですね。
 
 ## 前提条件
 
@@ -63,8 +63,11 @@ Gitレポジトリを4つ作る。
 
 Level2では下記のことを達成目標とする。
 
-1. 自作したPythonアプリケーションをライブラリ化する。つまり任意のマシン上で pip install xxxxx とやればインストールして再利用できるようにする。そのために `setup.py` と `requirements.txt` と `MANIFEST.in` などのファイルを書く。PyPIに自分のためのアカウントを作り、自作したライブラリをPyPIにアップして共有できるようにする。
-1. 自作したPythonアプリケーションを組み込んだDockerイメージを作る。Docker Hubに自分のためのアカウントを作り、自作したDockerイメージをDocker Hubにアップして共有できるようにする。
+1. Flaskフレームワークの公式サイトにある [Tutorial](https://flask.palletsprojects.com/en/1.1.x/tutorial/#tutorial) を参照しながら、Webアプリケーションを自作する。
+1. 自作したWebアプリをpipコマンドでライブラリ化する。PyPIにアップする。
+1. PyPIにアップした自作ライブラリを使ってDockerイメージを作成する。DockerイメージをDocker Hubにアップする。 
+
+自作のWebアプリのDockerイメージを作ることができれば、それを使ってどのマシンでもそのWebアプリを起動することが簡単にできるようになる。
 
 ## 手順
 
@@ -72,13 +75,15 @@ Python処理系のインストール、ディレクトリ構造の決定、pipen
 
 - [PythonProjectTemplateLevel1](https://github.com/kazurayam/PythonProjectTemplateLevel1) 
 
-パッケージ化の手順については下記の記事を参照した。
 
-- [あとで後悔しないPythonのディレクトリ構成をつくってみる](https://qiita.com/kobori_akira/items/aa42790354654debb655)
+またpipコマンドによるパッケージ化の作業とdockerコマンドによるDockerイメージの操作に関しては下記のLevel2のREADMEを参照のこと。
+
+- [PythonProjectTemplateLevel2](https://github.com/kazurayam/PythonProjectTemplateLevel2)
 
 ### Pipfileから仮想環境を再現する
 
-Gitレポジトリから`Pipfile`と`Pipfile.lock`を取得してると前提する。Pipfile.lockに基づいて仮想環境を再現しよう。
+Gitレポジトリから`Pipfile`と`Pipfile.lock`をローカルに取得してると前提する。Pipfile.lockに基づいて仮想環境を再現しよう。
+
 ```
 $repos/pyproject/ $ pipenv install
 Installing dependencies from Pipfile.lock (4e9768)...
@@ -87,40 +92,123 @@ To activate this project's virtualenv, run pipenv shell.
 Alternatively, run a command inside the virtualenv with pipenv run.
 ```
 
-これによってこのLevel2プロジェクトのために新しいPython仮想環境が自動的に作られる。
+これによってこのLevel3プロジェクトのために新しいPython仮想環境が自動的に作られる。
 
 なお新しいPython仮想環境をIntelliJ IDEAの設定に繁栄すべきところがが、自動的に修正されない。手作業で修正せよ。
 
-### コマンドラインで実行可能にしておく
+### Flask Tutorialを写経する
 
-[cli.py](pyproject/src/mypkg/cli.py)を追加します。
+Flaskの公式ドキュメントに含まれるチュートリアルをそのまま写経した。
+
+- [Tutorial](https://flask.palletsprojects.com/en/1.1.x/tutorial/#tutorial) 
+
+これについてわたしか付け加えることなどない。公式ドキュメントを読んでください。
+
+#### flaskをPython仮想環境にインストールする
 
 ```
-def execute(name='World'):
-    print(f'Hello,{name}!')
+$ cd PythonProjectTemplateLevel3/pyproject (master *)
+$ pipenv run pip install flask
 ```
 
-このプログラムをコマンドラインから実行できるように setup.py に記述します。
+```
+Collecting flask
+  Using cached Flask-1.1.2-py2.py3-none-any.whl (94 kB)
+Collecting click>=5.1
+  Using cached click-7.1.2-py2.py3-none-any.whl (82 kB)
+Collecting Jinja2>=2.10.1
+  Downloading Jinja2-2.11.3-py2.py3-none-any.whl (125 kB)
+     |██▋                             | 10 kB 1.8 MB/s eta 0:     |█████▏                          | 20 kB 1.4 MB/s eta     |███████▉                        | 30 kB 1.3 MB/s e     |██████████▍                     | 40 kB 1.3 MB/     |█████████████                   | 51 kB 1.2 M     |███████████████▋                | 61 kB 1.     |██████████████████▎             | 71 kB     |████████████████████▉           | 81      |███████████████████████▌        |      |██████████████████████████           |████████████████████████████▊     |█████████████████████████████     |████████████████████████████████| 125 kB 1.2 MB/s 
+Collecting Werkzeug>=0.15
+  Using cached Werkzeug-1.0.1-py2.py3-none-any.whl (298 kB)
+Collecting itsdangerous>=0.24
+  Using cached itsdangerous-1.1.0-py2.py3-none-any.whl (16 kB)
+Collecting MarkupSafe>=0.23
+  Using cached MarkupSafe-1.1.1-cp38-cp38-macosx_10_9_x86_64.whl (16 kB)
+Installing collected packages: MarkupSafe, Werkzeug, Jinja2, itsdangerous, click, flask
+Successfully installed Jinja2-2.11.3 MarkupSafe-1.1.1 Werkzeug-1.0.1 click-7.1.2 flask-1.1.2 itsdangerous-1.1.0
+```
+
+
+#### .flaskenv ファイルに環境変数の設定を書く
+
+Flaskを起動するとに環境変数 `FLASK_APP` ほかを指定しなければならない。コマンドラインでいちいち指定するのは面倒だ。`.flaskenv`ファイルに書けばいいらしい。
+
+- https://www.pgen.info/archives/1691
+
+[.flaskenv](pyproject/.flaskenv) ファイルを書いた。
+
+```
+FLASK_APP=src/flaskr
+FLASK_ENV=development
+```
+
+#### python-dotenvをインストールする
+
+```
+$ pipenv run flaskrun
+Loading .env environment variables...
+ * Tip: There are .env or .flaskenv files present. Do "pip install python-dotenv" to use them.
+...
+```
+python-dotenvをインストールしろと言われた。
+
+```
+$ pipenv install python-dotenv
+```
+
+#### Pipfileにスクリプトを書いて起動を簡単にする
+
+[Pipfile](pyproject/Pipfile) に `flaskrun` という名前でスクリプトをかた。これでFlaskアプリの起動が簡単になった。すなわちこうだ。
+
+```
+$ pipenv run flaskrun
+```
+すると下記のようなメッセージが表示され、flaskrアプリケーションが立ち上がったのがわかる。ブラウザで http://127.0.0.1:5000/hello を問い合わせると `Hello, World!` と応答した。
+
+```
+ * Serving Flask app "src/flaskr" (lazy loading)
+ * Environment: development
+ * Debug mode: on
+ * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 336-613-971
+```
+
+#### Courtesy Notice
+
+flaskrが起動されるとき長いメッセージが表示された。
+
+```
+Courtesy Notice: Pipenv found itself running within a virtual environment, so it will automatically use that environment, instead of creating its own for any project. You can set PIPENV_IGNORE_VIRTUALENVS=1 to force pipenv to ignore that environment and create its own instead. You can set PIPENV_VERBOSITY=-1 to suppress this warning.
+```
+
+これを表示しないようにしたい。メッセージには環境変数 PIPENV_VERBOSITY=-1と設定すればいいとある。
+
+たしかにコマンドラインで
+```
+$ PIPENV_VERBOSITY=-1
+$ pipenv run flaskrun
+```
+とやればCourtecy Noticeは表示されなくなる。でもキー入力が面倒だ。
+
+どこかファイルにPIPENV_VERBOSITY=-1と書きたいのだがどこに書けばいいのか？setup.pyでもだめ、Pipfileでもだめだった。はてな？
+
+...
+
+なあんだ。こうすればいいんだ。
+
+```
+
+```
+
 
 ### pipでライブラリ化する
 
 #### setup.pyファイルを書く
 
-`$repos/pyproject`ディレクトリの下に [`setup.py`](pyproject/setup.py) ファイルを作る。setup.pyは自作のPythonプログラムをpip installできるライブラリにするのに必須のもの。
-
-ライブラリの名前を決定する。パッケージ名と同じにするのが常道だろう。
-```
-setup(
-    name="mypkg",
-```
-
-`src`ディレクトリの下に`mypkg`ディレクトリを作りそのなかに`__init__.py`ファイルを入れておく。中身は空でいい。`mypkg/__init__.py`ファイルを作ることにより`mypkg`がPythonパッケージとして宣言され流。つまり利用者がわのPythonプログラムが
-
-```
-from mypkg import ...
-```
-
-という風に書けるようになる。`mypkg/__init__.py`ファイルを作り忘れると `from mypkg ...`がエラーになるから注意せよ。
+`$repos/pyproject`ディレクトリの下に [`setup.py`](pyproject/setup.py) ファイルを作った。
 
 #### Pipfileからrequirements.txtを生成する
 

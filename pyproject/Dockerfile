@@ -17,7 +17,7 @@ RUN pip install --upgrade pip && pip install -r requirements.txt && pip install 
 
 # greetingをコマンドラインで実行できるようにする。
 # テスト用のTestPyPIレポジトリからパッケージをダウンロードする
-RUN pip install --index-url https://test.pypi.org/simple/ mypkg-kazurayam
+RUN pip install --index-url https://test.pypi.org/simple/ flaskr-kazurayam
 
 # イメージを起動した直後にbashを実行するように指示
 CMD bash

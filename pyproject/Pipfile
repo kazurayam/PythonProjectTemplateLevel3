@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 requests = "*"
+python-dotenv = "*"
 
 [dev-packages]
 autopep8 = "*"
@@ -12,3 +13,7 @@ pytest = "*"
 
 [requires]
 python_version = "3.8"
+
+[scripts]
+ado = "echo much ado"
+flaskrun = "flask run"

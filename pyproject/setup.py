@@ -1,17 +1,17 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="mypkg-kazurayam",
+    name="flaskr-kazurayam",
     version="1.0",
-    description="simplest python package that greets you",
+    description="Flask Tutorial",
     author="kazurayam",
     author_email="kazu@gmail.com",
-    url="https://github.com/kazurayam/PythonProjectTemplateLevel2",
+    url="https://github.com/kazurayam/PythonProjectTemplateLevel3",
     packages=find_packages(where='src'),
     package_dir={'': 'src'},
     entry_points="""
       [console_scripts]
-      greeting = mypkg.cli:main 
+      hello = hello:hello 
     """,
     install_requires=open('requirements.txt').read().splitlines(),
 )
