@@ -511,6 +511,74 @@ cb42413394c4: Mounted from library/python
 
 ただしこのPythonProjectTemplateLevel2のPythonプログラムはこれ以上ないほどシンプルなのでGitHubとDockerHubを連携させる必要などない。この連携は別の機会に試すことにする。
 
+
+## pytestとcoverageを実行する
+
+pytestを実行するには
+```
+$ cd github
+:~/github
+$ cd PythonProjectTemplateLevel3
+:~/github/PythonProjectTemplateLevel3 (master *+)
+$ cd pyproject/
+:~/github/PythonProjectTemplateLevel3/pyproject (master *+)
+$ pipenv run pytest
+============================= test session starts ==============================
+platform darwin -- Python 3.8.5, pytest-6.2.2, py-1.10.0, pluggy-0.13.1
+rootdir: /Users/kazuakiurayama/github/PythonProjectTemplateLevel3/pyproject, configfile: setup.cfg, testpaths: tests
+collected 24 items                                                             
+
+tests/test_auth.py ........                                              [ 33%]
+tests/test_blog.py ............                                          [ 83%]
+tests/test_db.py ..                                                      [ 91%]
+tests/test_factory.py ..                                                 [100%]
+
+============================== 24 passed in 1.05s ==============================
+:~/github/PythonProjectTemplateLevel3/pyproject (master *+)
+```
+
+これに続いてcoverageを実行するには
+```
+$ pipenv run coverage run -m pytest
+============================= test session starts ==============================
+platform darwin -- Python 3.8.5, pytest-6.2.2, py-1.10.0, pluggy-0.13.1
+rootdir: /Users/kazuakiurayama/github/PythonProjectTemplateLevel3/pyproject, configfile: setup.cfg, testpaths: tests
+collected 24 items                                                             
+
+tests/test_auth.py ........                                              [ 33%]
+tests/test_blog.py ............                                          [ 83%]
+tests/test_db.py ..                                                      [ 91%]
+tests/test_factory.py ..                                                 [100%]
+
+============================== 24 passed in 1.22s ==============================
+:~/github/PythonProjectTemplateLevel3/pyproject (master *+)
+
+```
+
+coverageのレポートをみるには
+
+```
+$ pipenv run coverage report
+Name                     Stmts   Miss Branch BrPart  Cover
+----------------------------------------------------------
+src/flaskr/__init__.py      23      0      2      0   100%
+src/flaskr/auth.py          59      0     22      0   100%
+src/flaskr/blog.py          58      0     16      0   100%
+src/flaskr/db.py            25      0      4      0   100%
+src/flaskr/hello.py          5      5      0      0     0%
+----------------------------------------------------------
+TOTAL                      170      5     44      0    98%
+```
+
+HTML形式のレポートを生成させるには
+
+```
+$ pipenv run coverage html
+```
+
+するとhtmlcov/index.htmlファイルが生成されるからブラウザで開け。
+
+
 ## まとめ
 
 以上でLevel2は完了。つまり

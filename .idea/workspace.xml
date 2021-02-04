@@ -2,12 +2,19 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="9cfe71d4-df3b-45c5-ba2b-8d245e498558" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/pyproject/setup.cfg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/sqldialects.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/sqldialects.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pyproject/src/flaskr/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject/src/flaskr/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pyproject/src/flaskr/blog.py" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject/src/flaskr/blog.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pyproject/src/flaskr/templates/blog/create.html" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject/src/flaskr/templates/blog/create.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pyproject/src/flaskr/templates/blog/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject/src/flaskr/templates/blog/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pyproject/src/flaskr/templates/blog/update.html" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject/src/flaskr/templates/blog/update.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pyproject/MANIFEST.in" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject/MANIFEST.in" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pyproject/setup.py" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject/setup.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pyproject/src/hello.py" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject/src/flaskr/hello.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pyproject/tests/conftest.py" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject/tests/conftest.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pyproject/tests/data.sql" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject/tests/data.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pyproject/tests/test_auth.py" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject/tests/test_auth.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pyproject/tests/test_blog.py" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject/tests/test_blog.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pyproject/tests/test_db.py" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject/tests/test_db.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pyproject/tests/test_factory.py" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject/tests/test_factory.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -63,6 +70,7 @@
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/pyproject/src/flaskr" />
       <recent name="$PROJECT_DIR$/pyproject/src" />
       <recent name="$PROJECT_DIR$/docs/images" />
     </key>
@@ -124,7 +132,7 @@
       <workItem from="1612321108415" duration="3702000" />
       <workItem from="1612325478650" duration="2780000" />
       <workItem from="1612331535857" duration="3322000" />
-      <workItem from="1612340259070" duration="13728000" />
+      <workItem from="1612340259070" duration="21748000" />
     </task>
     <servers />
   </component>
