@@ -15,9 +15,18 @@ ADD MANIFEST.in MANIFEST.in
 # コンテナにPythonパッケージをインストールする
 RUN pip install --upgrade pip && pip install -r requirements.txt && pip install pytest
 
-# greetingをコマンドラインで実行できるようにする。
-# テスト用のTestPyPIレポジトリからパッケージをダウンロードする
+# テスト用のTestPyPIレポジトリからflaskr-kazurayamパッケージをインストールする
+# Flask本体をはじめとする外部パッケージもここでインストールする
 RUN pip install --index-url https://test.pypi.org/simple/ flaskr-kazurayam
 
-# イメージを起動した直後にbashを実行するように指示
-CMD bash
+# 環境変数を指定する
+ENV FLASK_APP=src/flaskr
+
+# init-dbを実行してデータベースを初期化する
+RUN flask init-db
+
+# WaitressがlistenするIPポートを公開する
+EXPOSE 5000
+
+# Dockerコンテナが起動した直後にwaitressでflaskrを実行する
+CMD ["waitress-serve", "--call", "flaskr:create_app"]

@@ -67,7 +67,7 @@ Gitレポジトリを4つ作る。
 
 ## 達成目標
 
-Level2では下記のことを達成目標とする。
+Level3では下記のことを達成目標とする。
 
 1. Flaskフレームワークの公式サイトにある [Tutorial](https://flask.palletsprojects.com/en/1.1.x/tutorial/#tutorial) を参照しながら、Webアプリケーションを自作する。
 1. 自作したWebアプリをpipコマンドでライブラリ化する。PyPIにアップする。
@@ -88,7 +88,7 @@ Python処理系のインストール、ディレクトリ構造の決定、pipen
 
 ### Pipfileから仮想環境を再現する
 
-Gitレポジトリから`Pipfile`と`Pipfile.lock`をローカルに取得してると前提する。Pipfile.lockに基づいて仮想環境を再現しよう。
+このLevel3プロジェクトのために専用のPython仮想環境をpipenvで作ろう。Gitレポジトリから`Pipfile`と`Pipfile.lock`をローカルに取得してあると前提する。`pipenv install`コマンド一発でPipfile.lockに基づいて仮想環境を作ることができる。
 
 ```
 $repos/pyproject/ $ pipenv install
@@ -100,7 +100,7 @@ Alternatively, run a command inside the virtualenv with pipenv run.
 
 これによってこのLevel3プロジェクトのために新しいPython仮想環境が自動的に作られる。
 
-なお新しいPython仮想環境をIntelliJ IDEAの設定に繁栄すべきところがが、自動的に修正されない。手作業で修正せよ。
+なお新しいPython仮想環境をIntelliJ IDEAの設定に繁栄すべきところが、自動的には修正されない。手作業で修正する必要がある。やり方はLevel1のREADMEを参照のこと。
 
 ### Flask Tutorialを写経する
 
@@ -108,9 +108,7 @@ Flaskの公式ドキュメントに含まれるチュートリアルをそのま
 
 - [Tutorial](https://flask.palletsprojects.com/en/1.1.x/tutorial/#tutorial) 
 
-ここに書いてある内容にわたしか付け加えることなどない。
-
-ただし環境がちょっと合わないところがあるので要点をメモしておく。
+ここに書いてある内容にわたしか付け加えることなどない。 ただし環境がちょっと違っているところがあるので要点をメモしておく。
 
 #### flaskをPython仮想環境にインストールする
 
@@ -140,7 +138,7 @@ Successfully installed Jinja2-2.11.3 MarkupSafe-1.1.1 Werkzeug-1.0.1 click-7.1.2
 
 #### .flaskenv ファイルに環境変数の設定を書く
 
-Flaskを起動するとに環境変数 `FLASK_APP` ほかを指定しなければならない。コマンドラインでいちいち指定するのは面倒だ。`.flaskenv`ファイルに書けばいいらしい。
+Flaskを起動するときに環境変数 `FLASK_APP` ほかを指定しなければならないが、コマンドラインでいちいち引数として指定するのは面倒だ。その代わり `.flaskenv` ファイルに書けばいいらしい。
 
 - https://www.pgen.info/archives/1691
 
@@ -153,13 +151,15 @@ FLASK_ENV=development
 
 #### python-dotenvをインストールする
 
+`flaskrun`コマンドでFlaskを起動しようとした。そうしたら
+
 ```
 $ pipenv run flaskrun
 Loading .env environment variables...
  * Tip: There are .env or .flaskenv files present. Do "pip install python-dotenv" to use them.
 ...
 ```
-python-dotenvをインストールしろと言われた。
+`.flaskenv`ファイルからパラメータを読み込ませるのなら python-dotenv が必要だからインストールしろと言われた。python-dotenvをインストールした。
 
 ```
 $ pipenv install python-dotenv
@@ -167,11 +167,12 @@ $ pipenv install python-dotenv
 
 #### Pipfileにスクリプトを書いて起動を簡単にする
 
-[Pipfile](pyproject/Pipfile) に `flaskrun` という名前でスクリプトをかた。これでFlaskアプリの起動が簡単になった。すなわちこうだ。
+[Pipfile](pyproject/Pipfile) に `flaskrun` という名前でスクリプトを書いた。`flask run`とタイプするだけなのだが。
 
 ```
 $ pipenv run flaskrun
 ```
+
 すると下記のようなメッセージが表示され、flaskrアプリケーションが立ち上がったのがわかる。ブラウザで http://127.0.0.1:5000/hello を問い合わせると `Hello, World!` と応答した。
 
 ```
@@ -184,7 +185,7 @@ $ pipenv run flaskrun
  * Debugger PIN: 336-613-971
 ```
 
-## pytestとcoverageを実行する
+### pytestとcoverageを実行する
 
 pytestを実行するには
 ```
@@ -250,7 +251,9 @@ $ pipenv run coverage html
 
 するとhtmlcov/index.htmlファイルが生成されるからブラウザで開け。
 
-## pipとwheelでライブラリ化してPyPIにアップロードする
+
+
+### pipとwheelでライブラリ化してPyPIにアップロードする
 
 [PythonProjectTemplateLevel2](https://github.com/kazurayam/PythonProjectTemplateLevel2) では
 
@@ -290,17 +293,57 @@ $ tree .
 (pyproject) :~/github/PythonProjectTemplateLevel3/pyproject
 $ twine upload --repository pipitest dist/*
 ```
-https://test.pypi.org/project/flaskr-kazurayam/1.0.0/ にアップロードできた。
+
+flaskr-kazurayamのバージョン1.0.0がTestPyPIに登録済みの状態でもう一度 `twine upload` コマンドを実行したらエラーになった。PyPIは同一バージョンを上書きすることを許さない。へえ、そうなのか。じゃあいったん削除すればよかろう。https://stackoverflow.com/questions/20403387/how-to-remove-a-package-from-pypi によれば ブラウザで https://test.pypi.org/ を開き自分のアカウントでログインして対象を選んで削除せよ、という。やってみた。削除はできた。もう一度 バージョン 1.0.0 を twine upload した。そうしたらまたエラーになった。しょうがない、setup.pyファイルに書いてあるバージョンを1.0.1に変更した。もう一度 twine upload した。 https://test.pypi.org/project/flaskr-kazurayam/1.0.1/ にアップロードできた。こうすればいいのね。わかった。
+
+### SECRET_KEYについて
+
+[Flask Tutorial / Deploy to Production](https://flask.palletsprojects.com/en/1.1.x/tutorial/deploy/) に **Configure the Secret Key** と題する節がある。Flaskがセッション情報を暗号化するのに使う秘密鍵 Secret Key を指定する必要があって、[`flaskr_/__init__.py](pyproject/src/flaskr/__init__.py) に或る固定的な文字列がデフォルトとして書いてある。開発者が自分のマシンでローカルにFlaskアプリを立ち上げてデバッグする場面ならデフォルト値にままでかまわない。しかしインターネットから不特定多数からのアクセスに晒される本番環境を構築する面にいたれば、SECRET_KEYを変更しなければならない。どうやればいいのか？
+
+Tutorialの記述を読んでもよくわからなかった。sqlite3のデータベースが `venv/var/flaskr-instance` というディレクトリの中に作られると書いてるが、なんだそりゃ？ 
+
+`venv/var/flaskr-instance/config.py` というファイルを作ってその中にSECRET_KEYを指定せと記述されてるが、Dockerコンテナ常にconfig.pyを生成するようにDockerfileを記述するのか？
+
+ううむ、わからない。本番環境をDockerで作るについてもっと情報を集めて試行錯誤しなければならない。また後日としよう。
 
 
-## Dockerイメージを作る
+### Waitress
+
+[Waitress](https://docs.pylonsproject.org/projects/waitress/en/stable/) を使う。
+
+Waitressが何かについては
+
+- [bottle.py+waitressでPython飲みで動作可能なWebサーバ](https://qiita.com/yoichiwo7/items/abcd87c8a8a2e027fc12)
+
+を参照のこと。
+
+waitressをインストールする。
+
+```
+$ pip install waitress
+```
+
+パッケージを追加したからこの場で`requirements.txt`を更新しておけ。
+
+```
+$ pip freeze > requirements.txt
+```
+
+`waitress-serve モジュール名:オブジェクト名` コマンドでwebサーバを起動する。
+
+```
+$ cd ~/github/PythonProjectTemplateLevel3/pyproject
+$ pipenv run waitress-serve --host=127.0.0.1 --port=5000 --call 'src/flaskr:create_app'
+Serving on http://0.0.0.0:5000
+```
+
+waitressを止めるには Ctrl+C とやれ。
+
+### Dockerイメージを作る
 
 MacにDocker Desktop for Macをインストール済みであると前提する。
 
 Docker Hubにアカウントを準備してあると前提する。
-
-
-#### Dockerイメージを作る
 
 [pyproject/Dockerfile](pyproject/Dockerfile) を作った。ここにはDockerイメージをを作るのに必要なDockerコマンドを記述しておく。
 
@@ -308,12 +351,12 @@ docker buildコマンドを実行してDockerイメージを作ろう。
 
 ```
 $repos/pyproject (master *+)
-$ docker build --tag kazurayam/flaskr-kazurayam:1.0.0 .
+$ docker build --tag kazurayam/flaskr-kazurayam:1.0.1 .
 
 ...
 
 Successfully built 2aee34772e1a
-Successfully tagged kazurayam/mypkg-kazurayam:1.0
+Successfully tagged kazurayam/flaskr-kazurayam:1.0.1
 ```
 
 成功した。
@@ -324,19 +367,19 @@ Dockerイメージができたことを確認するには `docker image list` �
 
 ```
 $ docker image ls
-REPOSITORY                       TAG          IMAGE ID       CREATED         SIZE
-kazurayam/flaskr-kazurayam       1.0.0          2aee34772e1a   3 minutes ago   136MB
-
+REPOSITORY                       TAG          IMAGE ID       CREATED          SIZE
+kazurayam/flaskr-kazurayam       1.0.1        c8ba901cc52b   58 seconds ago   173MB
+kazurayam/flaskr-kazurayam       1.0.0        d9f09bea3828   18 hours ago     141MB
 ...
 ```
 
 #### 自作したDockerイメージからDockerコンテナを起動する
 
-私のMac上の別の適当なディレクトリにcdしてからdocker runコマンドを実行すればそこでDockerコンテナを起動することができる。やってみよう。Dockerコンテナが起動され、そのbashシェルにログインした状態になる。
+私のMac上の別の適当なディレクトリにcdしてからdocker runコマンドを実行すればそこでDockerコンテナを起動することができる。やってみよう。Dockerコンテナが起動され、
 
 ```
 $ cd ~/tmp
-$ docker run -it --rm kazurayam/flaskr-kazurayam:1.0.0
+$ docker run -it --rm kazurayam/flaskr-kazurayam:1.0.1
 root@5c580d014ccf:/work# 
 ```
 
@@ -366,6 +409,9 @@ exit
 :~/tmp
 ```
 
+#### Dockerコンテナを起動したらwebアプリを自動的に起動する
+
+
 #### Dockerイメージの保存先
 
 このDockerイメージの実体としてのファイルがPC/Macのどこに保存されたかはdockerコマンドが知っている。Dockerイメージを取り出すには必ずdockerコマンドを使うので、保存場所を知っておく必要はない。
@@ -387,8 +433,6 @@ dockerコンテナの作成、起動から停止までどんなコマンドを�
 - [DockerImageをDockerHubに登録する方法](https://qiita.com/kon_yu/items/7c40f4dfbd1cce006ce7)
 
 事前にDocker Hubに自分のためのアカウントを準備しておいた。
-
-#### ローカルからイメージをpushする方法
 
 Docker Hubにログインする
 '''
@@ -420,17 +464,14 @@ cb42413394c4: Mounted from library/python
 
 ![onDockerHub](docs/images/onDockerHub.png)
 
-#### GitHub連携する方法
-
-自作プロジェクトを更新してレポジトリをGitHubにpushしたとき、その変更をトリガーとして自動的にDocker Hub上のイメージをビルドし直すことができるらしい。それは便利だ。
-
-ただしこのPythonProjectTemplateLevel2のPythonプログラムはこれ以上ないほどシンプルなのでGitHubとDockerHubを連携させる必要などない。この連携は別の機会に試すことにする。
 
 ## まとめ
 
-以上でLevel2は完了。つまり
+以上でLevel3は完了。つまり
 
-1. 自作のPythonプログラムをpipでライブラリ化した。自作ライブラリをPyPIにアップした。
-1. 自作ライブラリを使ってDockerイメージを作った。DockerイメージをDocker Hubにアップした。
-
-これで自作したPythonプログラムを他のひと他の場所で共有する準備ができた。
+1. FlaskのTutorialを写経して flaskr アプリを作った。 
+1. Tutorialには pytestによるユニットテストのサンプルコードが書いてあった。丁寧に写経した。
+1. 自分のflaskrアプリをpipでライブラリ化し、PyPIにアップした。
+1. Dockerイメージを作った。
+   
+写経したflaskrアプリがDockerコンテナで動くことを確認した。
