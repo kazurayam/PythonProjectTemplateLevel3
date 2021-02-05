@@ -107,7 +107,9 @@ Flaskの公式ドキュメントに含まれるチュートリアルをそのま
 
 - [Tutorial](https://flask.palletsprojects.com/en/1.1.x/tutorial/#tutorial) 
 
-これについてわたしか付け加えることなどない。公式ドキュメントを読んでください。
+ここに書いてある内容にわたしか付け加えることなどない。
+
+ただし環境がちょっと合わないところがあるので要点をメモしておく。
 
 #### flaskをPython仮想環境にインストールする
 
@@ -181,236 +183,148 @@ $ pipenv run flaskrun
  * Debugger PIN: 336-613-971
 ```
 
-#### Courtesy Notice
+## pytestとcoverageを実行する
 
-flaskrが起動されるとき長いメッセージが表示された。
-
+pytestを実行するには
 ```
-Courtesy Notice: Pipenv found itself running within a virtual environment, so it will automatically use that environment, instead of creating its own for any project. You can set PIPENV_IGNORE_VIRTUALENVS=1 to force pipenv to ignore that environment and create its own instead. You can set PIPENV_VERBOSITY=-1 to suppress this warning.
-```
+$ cd github
+:~/github
+$ cd PythonProjectTemplateLevel3
+:~/github/PythonProjectTemplateLevel3 (master *+)
+$ cd pyproject/
+:~/github/PythonProjectTemplateLevel3/pyproject (master *+)
+$ pipenv run pytest
+============================= test session starts ==============================
+platform darwin -- Python 3.8.5, pytest-6.2.2, py-1.10.0, pluggy-0.13.1
+rootdir: /Users/kazuakiurayama/github/PythonProjectTemplateLevel3/pyproject, configfile: setup.cfg, testpaths: tests
+collected 24 items                                                             
 
-これを表示しないようにしたい。メッセージには環境変数 PIPENV_VERBOSITY=-1と設定すればいいとある。
+tests/test_auth.py ........                                              [ 33%]
+tests/test_blog.py ............                                          [ 83%]
+tests/test_db.py ..                                                      [ 91%]
+tests/test_factory.py ..                                                 [100%]
 
-たしかにコマンドラインで
-```
-$ PIPENV_VERBOSITY=-1
-$ pipenv run flaskrun
-```
-とやればCourtecy Noticeは表示されなくなる。でもキー入力が面倒だ。
-
-どこかファイルにPIPENV_VERBOSITY=-1と書きたいのだがどこに書けばいいのか？setup.pyでもだめ、Pipfileでもだめだった。はてな？
-
-...
-
-なあんだ。こうすればいいんだ。
-
-```
-
+============================== 24 passed in 1.05s ==============================
+:~/github/PythonProjectTemplateLevel3/pyproject (master *+)
 ```
 
+これに続いてcoverageを実行するには
+```
+$ pipenv run coverage run -m pytest
+============================= test session starts ==============================
+platform darwin -- Python 3.8.5, pytest-6.2.2, py-1.10.0, pluggy-0.13.1
+rootdir: /Users/kazuakiurayama/github/PythonProjectTemplateLevel3/pyproject, configfile: setup.cfg, testpaths: tests
+collected 24 items                                                             
 
-### pipでライブラリ化する
+tests/test_auth.py ........                                              [ 33%]
+tests/test_blog.py ............                                          [ 83%]
+tests/test_db.py ..                                                      [ 91%]
+tests/test_factory.py ..                                                 [100%]
 
-#### setup.pyファイルを書く
-
-`$repos/pyproject`ディレクトリの下に [`setup.py`](pyproject/setup.py) ファイルを作った。
-
-#### Pipfileからrequirements.txtを生成する
-
-pipコマンドでライブラリ化するには [`requirements.txt`](pyproject/requirements.txt) ファイルが必要になる。当該ライブラリを実行するときに必要となる外部ライブラリの名前とバージョンを列挙したファイルである。
-
-下記のコマンドで生成する。
+============================== 24 passed in 1.22s ==============================
+:~/github/PythonProjectTemplateLevel3/pyproject (master *+)
 
 ```
-$ cd $repo/pyproject
-$ pipenv run pip freeze > requirements.txt
-```
 
-このテクニックを使えば外部依存ライブラリの管理をPipenvに一元化しつつ、pipコマンドでライブラリ化する作業をすることができます。
-
-#### MANIFEST.inファイルを作る
-
-tarファイルを作るために `python setup.py sdist` コマンドを実行するとき `requirements.txt` ファイルを読み込ませる必要がある。そのために MANIFEST.in を新規作成しておく。
-
-[pyproject/MANIFEST.in](pyproject/MANIFEST.in)
-
-#### ライブラリを作る
+coverageのレポートをみるには
 
 ```
-:~/github/PythonProjectTemplateLevel2/pyproject (master *+)
-$ pipenv run python setup.py sdist
+$ pipenv run coverage report
+Name                     Stmts   Miss Branch BrPart  Cover
+----------------------------------------------------------
+src/flaskr/__init__.py      23      0      2      0   100%
+src/flaskr/auth.py          59      0     22      0   100%
+src/flaskr/blog.py          58      0     16      0   100%
+src/flaskr/db.py            25      0      4      0   100%
+src/flaskr/hello.py          5      5      0      0     0%
+----------------------------------------------------------
+TOTAL                      170      5     44      0    98%
 ```
-とやる。するといろいろファイルができる。
+
+HTML形式のレポートを生成させるには
+
+```
+$ pipenv run coverage html
+```
+
+するとhtmlcov/index.htmlファイルが生成されるからブラウザで開け。
+
+## pipとwheelでライブラリ化してPyPIにアップロードする
+
+[PythonProjectTemplateLevel2](https://github.com/kazurayam/PythonProjectTemplateLevel2) では
+
+`python setup.py sdist`　でパッケージ化した。`sdist`とは *source distribution*の意味。その名の通り、Python言語で書かれたソースコードを配布する。そのため利用者が `pip install xxxxx` を実行すると利用者側で `setup.py` の記述に基づいたビルド処理が実行される。
+
+このビルド処理が失敗しがちだ。このビルド処理がOSによって違う（Windowsで・・・）とか、Python処理系のバージョンが合わなくて・・・とか。ソースコードを配布するのでなくビルド済みのパッケージを配布するやり方があればそっちの方が良い。ここで利用されるのが [wheel](https://pythonwheels.com/) 。
+>Wheels are the new standard of Python distributio and are intended to replace eggs.
+
+wheelをインストールしよう。
+```
+$ pip install wheel
+```
+
+wheelをインストールすると `bdist_wheel` が使えるようになる。`sdist`ではなくてこっちでライブラリ化する。
+
+```
+$ python setup.py bdist_wheel 
+```
+すると `dist` ディレクトリのなかにファイル名の末尾が `.whl` のファイルができた。これが wheel形式でのライブラリファイルである。
 
 ```
 $ tree .
 .
-└── pyproject
-    ├── MANIFEST.in
-    ├── Pipfile
-    ├── Pipfile.lock
-    ├── dist
-    │   └── mypkg-1.0.tar.gz
-    ├── mypkg.egg-info
-    │   ├── PKG-INFO
-    │   ├── SOURCES.txt
-    │   ├── dependency_links.txt
-    │   ├── entry_points.txt
-    │   ├── requires.txt
-    │   └── top_level.txt
-    ├── requirements.txt
-    ├── setup.py
-    ├── src
-    │   └── mypkg
-    │       ├── __init__.py
-    │       └── greeting.py
-    └── tests
-        ├── __init__.py
-        ├── conftest.py
-        └── test_greeting.py
+├── Dockerfile
+├── MANIFEST.in
+├── Pipfile
+├── Pipfile.lock
+├── build
+├── dist
+│   ├── flaskr-kazurayam-1.0.0.tar.gz
+│   └── flaskr_kazurayam-1.0.0-py3-none-any.whl
 ```
 
-`dist/mypkg-1.0.tar.gz` がPyPIにアップロードされるべきライブラリの実体だ。
-
-#### distディレクトリに作られたtarをpip installしてみる
-
-distディレクトリに作られたtarファイルをPyPIにアップロードする前に、ローカルにpip install してみよう。
+`sdist`オプションによって作られた tar.gz ファイルは削除してしまおう。`.whl`ファイルをPyPIにアップすればいい。twineコマンドで
 
 ```
-$repos/pyproject (master *+)
-$ pipenv run pip install dist/mypkg-1.0.tar.gz
+(pyproject) :~/github/PythonProjectTemplateLevel3/pyproject
+$ twine upload --repository pipitest dist/*
 ```
-
-コマンドラインで実行してみよう。
-
-```
-$ pipenv run greeting
-Hello, World!
-```
-
-greetingは引数を1個受けとることができる。
-
-```
-$ pipenv run greeting Simon
-Hello, Simon!
-```
-
-### PyPIにアップロードする
-
-The Python Package Index略してPyPIに自作ライブラリをアップロードすれば、別マシンでそれを pip install xxxxx で簡単にインストールして利用することができます。やりましょう。
-
-#### Twineをインストールする
-
-Twineというツールを使ってPyPIにアップロードします。下記の記事を参考にインストールしよう。
-
-- [Python: Twine を使って PyPI にパッケージをアップロードする](https://blog.amedama.jp/entry/2017/12/31/175036)
-
-```
-$repos/pyproject (master *)
-$ pipenv run pip install twine
-```
-
-#### PyPIに自分のためのアカウントを作る。
-
-本番リリース用のサイト https://pypi.org/ の Register 画面で自分のアカウントを作ろう。
-
-同じくテスト用のサイト https://test.pypi.org/ の Register 画面で自分のアカウントを作ろう。
-
-UsernameとPasswordをメモっておけ。
-
-[`~/.pypirc`](https://packaging.python.org/specifications/pypirc/) ファイルを作る。そこには本番リリース用PyPIのURLとわたしのアカウントに関する情報、テスト用TestPyPIのURLとわたしのアカウントに関する情報を書いておく。これによってtwineコマンドを実行するときにURLやアカウント情報を繰り返し入力する手間を省くことができる。当然ながら~/.pypircファイルを他人の目に晒さないように注意せよ。
-
-#### ビルドしてPyPIにアップロードする
-
-ビルドしてテスト用のPiPIにアップロードしてみよう。
-
-```
-$repos/pyproject/ $ pipenv run python setup.py sdist
-
-...
-
-$ pipenv run twine upload --repository pypitest dist/*
-Uploading distributions to https://test.pypi.org/legacy/
-Uploading mypkg-1.0.tar.gz
-100%|█████████████████████████████████████]100%|██████████████████████████████████████| 4.13k/4.13k [00:01<00:00, 2.72kB/s]
-NOTE: Try --verbose to see response content.
-HTTPError: 403 Forbidden from https://test.pypi.org/legacy/
-The user 'kazurayam_test' isn't allowed to upload to project 'mypkg'. See https://test.pypi.org/help/#project-name for more information.
-```
-
-あれ？エラーが発生した。メッセージに https://test.pypi.org/help/#project-name を読めと書いてある。どうやら `mypkg-1.0.tar.gz` というファイル名の先頭部分 `mypkg` という名前がPyPIのお気に召さないらしい。[Why cant I upload my own package to PyPI when my credential are working?
-](https://stackoverflow.com/questions/57457879/why-cant-i-upload-my-own-package-to-pypi-when-my-credential-are-working)によれば原因はPyPIのどこかにすでに `mypkg` という名前のライブラリがすでに存在しているから。だからユニークな名前に変更せよ、という。
-
-では対処しよう。今まで `setup.py` にこう書いてあった。
-```
-setup(
-    name="mypkg",
-```
-ここを書きかえよう。
-```
-setup(
-    name="mypkg-kazurayam",
-```
-そして `python setup.py sdist` と `twine upload --repository pypitest dist/*` をやり直せ。今度はどうかな？
-
-```
-$ pipenv run python setup.py sdist
-```
-
-ここで気がついた。旧い名前の成果物 `pyproject/dist/mypkg-1.0.tar.gz` が自動では削除されずに残っていた。これを手動で削除しなければならなかった。
-
-```
-$ pipenv run twine upload --repository pypitest dist/*
-Uploading distributions to https://test.pypi.org/legacy/
-Uploading mypkg-kazurayam-1.0.tar.gz
-100%|██████████████████████████████████████████████████████████████]100%|████████████████████████████████████████████████████████████████████████████████████████| 4.19k/4.19k [00:02<00:00, 2.07kB/s]
-
-View at:
-https://test.pypi.org/project/mypkg-kazurayam/1.0/
-```
-
-うまくいった。ブラウザで https://test.pypi.org/project/mypkg-kazurayam/1.0/ を開いたらPyPIにアップロードできていた。
-
-![onTestPyPI](docs/images/onTestPyPI.png)
-
-成功！
-
-### Dockerイメージを作る
-
-#### Docker Desktop for Macをインストールする
-
-maxOS 11.1に Docker Desktop for Mac をインストールして使うことにする。
-
-Docker Desktop for Macを使えば、Mac Book Air上でDockerコンテナを動かすことができる。コマンドラインで `docker` コマンドを実行することができる。
-
-https://docs.docker.com/docker-for-mac/install/ を参照しながらインストールせよ。Docker Hubからdmgファイルをダウンロードしてダブルクリックし、Applicationsディレクトリに格納するだけだ。
+https://test.pypi.org/project/flaskr-kazurayam/1.0.0/ にアップロードできた。
 
 
-#### Dockeer Hubにアカウントを作る
+## Dockerイメージを作る
 
-私は [Docker Hub](https://hub.docker.com/) に自分のためのアカウントを作成済みだった。まだ持っていなければ作ればいいだけのこと。
+MacにDocker Desktop for Macをインストール済みであると前提する。
+
+Docker Hubにアカウントを準備してあると前提する。
+
 
 #### Dockerイメージを作る
 
 [pyproject/Dockerfile](pyproject/Dockerfile) を作った。ここにはDockerイメージをを作るのに必要なDockerコマンドを記述しておく。
 
-そしてdockerコマンドを実行する。
+docker buildコマンドを実行してDockerイメージを作ろう。
 
 ```
 $repos/pyproject (master *+)
-$ docker build --tag kazurayam/mypkg-kazurayam:1.0 .
+$ docker build --tag kazurayam/flaskr-kazurayam:1.0.0 .
 
 ...
 
 Successfully built 2aee34772e1a
 Successfully tagged kazurayam/mypkg-kazurayam:1.0
 ```
-成功した。Dockerイメージができたことを確認するには `docker list` コマンドを投入する。
+
+成功した。
+
+>Level2では `python setup.py sdist` でライブラリ化していた。Level3では `python setup.py bdist_wheel`でwheel形式のライブラリを作った。この違いによりDockerfileの書き方が影響を受けるのだろうか？と迷ったが、やってみると成功した。ってことはDockerfileの書き方には影響しない。
+
+Dockerイメージができたことを確認するには `docker image list` コマンドを投入する。
 
 ```
 $ docker image ls
 REPOSITORY                       TAG          IMAGE ID       CREATED         SIZE
-kazurayam/mypkg-kazurayam        1.0          2aee34772e1a   3 minutes ago   136MB
+kazurayam/flaskr-kazurayam       1.0.0          2aee34772e1a   3 minutes ago   136MB
 
 ...
 ```
@@ -421,7 +335,7 @@ kazurayam/mypkg-kazurayam        1.0          2aee34772e1a   3 minutes ago   136
 
 ```
 $ cd ~/tmp
-$ docker run -it --rm kazurayam/mypkg-kazurayam:1.0
+$ docker run -it --rm kazurayam/flaskr-kazurayam:1.0.0
 root@5c580d014ccf:/work# 
 ```
 
@@ -510,74 +424,6 @@ cb42413394c4: Mounted from library/python
 自作プロジェクトを更新してレポジトリをGitHubにpushしたとき、その変更をトリガーとして自動的にDocker Hub上のイメージをビルドし直すことができるらしい。それは便利だ。
 
 ただしこのPythonProjectTemplateLevel2のPythonプログラムはこれ以上ないほどシンプルなのでGitHubとDockerHubを連携させる必要などない。この連携は別の機会に試すことにする。
-
-
-## pytestとcoverageを実行する
-
-pytestを実行するには
-```
-$ cd github
-:~/github
-$ cd PythonProjectTemplateLevel3
-:~/github/PythonProjectTemplateLevel3 (master *+)
-$ cd pyproject/
-:~/github/PythonProjectTemplateLevel3/pyproject (master *+)
-$ pipenv run pytest
-============================= test session starts ==============================
-platform darwin -- Python 3.8.5, pytest-6.2.2, py-1.10.0, pluggy-0.13.1
-rootdir: /Users/kazuakiurayama/github/PythonProjectTemplateLevel3/pyproject, configfile: setup.cfg, testpaths: tests
-collected 24 items                                                             
-
-tests/test_auth.py ........                                              [ 33%]
-tests/test_blog.py ............                                          [ 83%]
-tests/test_db.py ..                                                      [ 91%]
-tests/test_factory.py ..                                                 [100%]
-
-============================== 24 passed in 1.05s ==============================
-:~/github/PythonProjectTemplateLevel3/pyproject (master *+)
-```
-
-これに続いてcoverageを実行するには
-```
-$ pipenv run coverage run -m pytest
-============================= test session starts ==============================
-platform darwin -- Python 3.8.5, pytest-6.2.2, py-1.10.0, pluggy-0.13.1
-rootdir: /Users/kazuakiurayama/github/PythonProjectTemplateLevel3/pyproject, configfile: setup.cfg, testpaths: tests
-collected 24 items                                                             
-
-tests/test_auth.py ........                                              [ 33%]
-tests/test_blog.py ............                                          [ 83%]
-tests/test_db.py ..                                                      [ 91%]
-tests/test_factory.py ..                                                 [100%]
-
-============================== 24 passed in 1.22s ==============================
-:~/github/PythonProjectTemplateLevel3/pyproject (master *+)
-
-```
-
-coverageのレポートをみるには
-
-```
-$ pipenv run coverage report
-Name                     Stmts   Miss Branch BrPart  Cover
-----------------------------------------------------------
-src/flaskr/__init__.py      23      0      2      0   100%
-src/flaskr/auth.py          59      0     22      0   100%
-src/flaskr/blog.py          58      0     16      0   100%
-src/flaskr/db.py            25      0      4      0   100%
-src/flaskr/hello.py          5      5      0      0     0%
-----------------------------------------------------------
-TOTAL                      170      5     44      0    98%
-```
-
-HTML形式のレポートを生成させるには
-
-```
-$ pipenv run coverage html
-```
-
-するとhtmlcov/index.htmlファイルが生成されるからブラウザで開け。
-
 
 ## まとめ
 
