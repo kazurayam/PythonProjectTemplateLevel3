@@ -137,5 +137,10 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
+# IntelliJ IDEA
+.idea/
+*.iml
+
+
 # Sqlite database file
 *.sqlite
