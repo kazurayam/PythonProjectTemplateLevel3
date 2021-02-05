@@ -6,8 +6,6 @@ import pytest
 from flaskr import create_app
 from flaskr.db import get_db, init_db
 
-# update sys.path to include the 'src' directory in the Module-Search path
-sys.path.append(os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + "/../src/"))
 
 
 with open(os.path.join(os.path.dirname(__file__), 'data.sql'), 'rb') as f:

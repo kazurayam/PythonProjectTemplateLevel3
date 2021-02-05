@@ -278,15 +278,14 @@ $ tree .
 `sdist`オプションによって作られた tar.gz ファイルは削除してしまおう。`.whl`ファイルをPyPIにアップすればいい。twineコマンドで
 
 ```
-(pyproject) :~/github/PythonProjectTemplateLevel3/pyproject
-$ twine upload --repository pipitest dist/*
+$ pipenv run twine upload --repository pypitest dist/*
 ```
 
 flaskr-kazurayamのバージョン1.0.0がTestPyPIに登録済みの状態でもう一度 `twine upload` コマンドを実行したらエラーになった。PyPIは同一バージョンを上書きすることを許さない。へえ、そうなのか。じゃあいったん削除すればよかろう。https://stackoverflow.com/questions/20403387/how-to-remove-a-package-from-pypi によれば ブラウザで https://test.pypi.org/ を開き自分のアカウントでログインして対象を選んで削除せよ、という。やってみた。削除はできた。もう一度 バージョン 1.0.0 を twine upload した。そうしたらまたエラーになった。しょうがない、setup.pyファイルに書いてあるバージョンを1.0.1に変更した。もう一度 twine upload した。 https://test.pypi.org/project/flaskr-kazurayam/1.0.1/ にアップロードできた。こうすればいいのね。わかった。
 
 ### SECRET_KEYについて
 
-[Flask Tutorial / Deploy to Production](https://flask.palletsprojects.com/en/1.1.x/tutorial/deploy/) に **Configure the Secret Key** と題する節がある。Flaskがセッション情報を暗号化するのに使う秘密鍵 Secret Key を指定する必要があって、[`flaskr_/__init__.py](pyproject/src/flaskr/__init__.py) に或る固定的な文字列がデフォルトとして書いてある。開発者が自分のマシンでローカルにFlaskアプリを立ち上げてデバッグする場面ならデフォルト値にままでかまわない。しかしインターネットから不特定多数からのアクセスに晒される本番環境を構築する面にいたれば、SECRET_KEYを変更しなければならない。どうやればいいのか？
+[Flask Tutorial / Deploy to Production](https://flask.palletsprojects.com/en/1.1.x/tutorial/deploy/) に **Configure the Secret Key** と題する節がある。Flaskがセッション情報を暗号化するのに使う秘密鍵 Secret Key を指定する必要があって、[`flaskr_/__init__.py](pyproject/flaskr/__init__.py) に或る固定的な文字列がデフォルトとして書いてある。開発者が自分のマシンでローカルにFlaskアプリを立ち上げてデバッグする場面ならデフォルト値にままでかまわない。しかしインターネットから不特定多数からのアクセスに晒される本番環境を構築する面にいたれば、SECRET_KEYを変更しなければならない。どうやればいいのか？
 
 Tutorialの記述を読んでもよくわからなかった。sqlite3のデータベースが `venv/var/flaskr-instance` というディレクトリの中に作られると書いてるが、なんだそりゃ？ 
 
@@ -321,7 +320,7 @@ $ pip freeze > requirements.txt
 
 ```
 $ cd ~/github/PythonProjectTemplateLevel3/pyproject
-$ pipenv run waitress-serve --host=127.0.0.1 --port=5000 --call 'src/flaskr:create_app'
+$ pipenv run waitress-serve --port=5000 --call 'flaskr:create_app'
 Serving on http://0.0.0.0:5000
 ```
 
@@ -367,52 +366,34 @@ kazurayam/flaskr-kazurayam       1.0.0        d9f09bea3828   18 hours ago     14
 
 ```
 $ cd ~/tmp
-$ docker run -it --rm kazurayam/flaskr-kazurayam:1.0.1
+$ docker run -it -p 80:8080 --rm kazurayam/flaskr-kazurayam:1.0.2
 root@5c580d014ccf:/work# 
 ```
 
-できた。ではPythonで自作した `greeting` コマンドを実行してみよう。
+これで http://localhost:80/ にブラウザからアクセスできるようになった。
 
+#### IPポート番号の設定について
+
+Dockerコンテナで起動したflaskrにブラウザから http://localhost:80/ でアクセスしたい。つまり外部から見てIPポート 80番でアクセスできるようにしたい。
+
+IPポート番号の設定は２箇所で行う。
+
+第一に[Dockerfile](pyproject/Dockerfile)で。waitressコマンドでサーバを起動するとき、waitressのプロセスがlistenするポート番号をコマンドライン引数で指定する。デフォルトでは 8080 だが、明示的に指定することもできる。
 ```
-root@5c580d014ccf:/work# greeting Python
-Hello, Python!
-root@5c580d014ccf:/work# 
-```
-
-greetingコマンドが動いた。
-
-どんなdockerコンテナが今動いているかを見るには、別のターミナルを起動して、docker psコマンドを打つ。
-
-```
-$ docker ps
-CONTAINER ID   IMAGE                           COMMAND             CREATED          STATUS          PORTS     NAMES
-d036761d3325   kazurayam/mypkg-kazurayam:1.0   "/bin/sh -c bash"   12 seconds ago   Up 10 seconds             unruffled_chaplygin
+CMD ["waitress-serve", "--port", "8080", ...
 ```
 
-ではDockerコンテナを終了させよう。exitすれば良い。
+また、Dockerコンテナ内部のwaitressプロセスがlistenするポート番号をDockerコンテナが許可するように、EXPOSEコマンドを指定する。
 
 ```
-root@5c580d014ccf:/work# exit
-exit
-:~/tmp
+EXPOSE 8080
 ```
 
-#### Dockerコンテナを起動したらwebアプリを自動的に起動する
+第二に、`docker run`でDockerコンテナを起動するとき、ホストOSが認知するポート番号をコンテナが開いているポート番号と対応づける必要がある。これをやらないと外部からコンテナ内部のプロセスに通信することができない。
 
-
-#### Dockerイメージの保存先
-
-このDockerイメージの実体としてのファイルがPC/Macのどこに保存されたかはdockerコマンドが知っている。Dockerイメージを取り出すには必ずdockerコマンドを使うので、保存場所を知っておく必要はない。
-
-ここで作ったDockerイメージをよそでも利用したければ、イメージをいったんDocker Hubにあげて共有可能な状態にせよ。別PCでdockerコマンドを実行しDocker Hubからイメージをダウンロードせよ。
-
-#### dockerコマンドのレファレンス
-
-dockerコンテナの作成、起動から停止までどんなコマンドを使うかについては
-
-- [Dockerコンテナの作成、起動〜停止まで](https://qiita.com/kooohei/items/0e788a2ce8c30f9dba53)
-
-が役に立つ。
+```
+$ docker run --it -p 80:8080 ...
+```
 
 ### Docker Hubにアップロードする
 
@@ -429,7 +410,7 @@ $ docker login
 
 自作したイメージをpushする
 ```
-$ docker push kazurayam/mypkg-kazurayam:1.0
+$ docker push kazurayam/flaskr-kazurayam:1.0.2
 The push refers to repository [docker.io/kazurayam/mypkg-kazurayam]
 eabc49849837: Pushed 
 02431f26c7f4: Pushed 
@@ -450,8 +431,6 @@ cb42413394c4: Mounted from library/python
 
 できた。ブラウザで https://hub.docker.com/ を開き、自分のアカウントでログインすれば、今アップしたDockerイメージがたしかにDocker Hubに格納されているのがわかる。
 
-![onDockerHub](docs/images/onDockerHub.png)
-
 
 ## まとめ
 
@@ -462,4 +441,4 @@ cb42413394c4: Mounted from library/python
 1. 自分のflaskrアプリをpipでライブラリ化し、PyPIにアップした。
 1. Dockerイメージを作った。
    
-写経したflaskrアプリがDockerコンテナで動くことを確認した。
+写経したflaskrアプリがDockerコンテナのなかで動いて http://localhost:80/ でアクセス可能になっていることを確認した。

@@ -2,12 +2,11 @@
 # このイメージを元に使って
 FROM python:3.8.7-slim
 
-# イメージの中の"cd"
+# 作業用ディレクトリを作ってそこにcdする
 WORKDIR /work
 
 # ローカルファイルをコンテナの中にコピーする
-ADD src src
-ADD tests tests
+ADD flaskr flaskr
 ADD requirements.txt requirements.txt
 ADD setup.py setup.py
 ADD MANIFEST.in MANIFEST.in
@@ -20,13 +19,13 @@ RUN pip install --upgrade pip && pip install -r requirements.txt && pip install 
 RUN pip install --index-url https://test.pypi.org/simple/ flaskr-kazurayam
 
 # 環境変数を指定する
-ENV FLASK_APP=src/flaskr
+ENV FLASK_APP=flaskr
 
 # init-dbを実行してデータベースを初期化する
 RUN flask init-db
 
 # WaitressがlistenするIPポートを公開する
-EXPOSE 5000
+EXPOSE 8080
 
-# Dockerコンテナが起動した直後にwaitressでflaskrを実行する
-CMD ["waitress-serve", "--call", "flaskr:create_app"]
+# Dockerコンテナが起動したらすぐにwaitressサーバでflaskrを起動する
+CMD ["waitress-serve", "--port", "8080", "--call", "flaskr:create_app"]
